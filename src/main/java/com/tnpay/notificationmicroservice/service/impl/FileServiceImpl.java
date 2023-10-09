@@ -27,20 +27,10 @@ import java.util.*;
 @Service
 public class FileServiceImpl implements FileService {
     @Override
-    public ResponseEntity<FileResponse> save(MultipartFile file, Long userId) throws IOException {
-        //db related operation using the userId
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("File is empty or not provided.");
-        }
-
+    public ResponseEntity<FileResponse> save(MultipartFile file) throws IOException {
+        FileUtils.isValid(file);
         String fileName = file.getOriginalFilename();
         Path filePath = Paths.get(System.getProperty("user.dir"), "notification-microservice/src/main/resources/static/uploads", fileName);
-        if (Objects.isNull(fileName))
-            throw new BadRequestException("file name is null");
-        String fileExtension = FileUtils.getFileExtension(fileName);
-        if (!FileExtensionDto.isValid(fileExtension)) {
-            throw new BadRequestException("Error: file Extension is not valid!!");
-        }
 
         try {
             Files.write(filePath, file.getBytes());

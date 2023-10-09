@@ -23,8 +23,8 @@ public class FileController {
 
 
     @PostMapping("/file-upload")
-    public ResponseEntity<FileResponse> insertFile(@RequestParam("file") MultipartFile file, Long userId) throws IOException {
-        return fileService.save(file, userId);
+    public ResponseEntity<FileResponse> insertFile(@RequestParam("file") MultipartFile file) throws IOException {
+        return fileService.save(file);
     }
 
     @GetMapping("/generate-pdf")

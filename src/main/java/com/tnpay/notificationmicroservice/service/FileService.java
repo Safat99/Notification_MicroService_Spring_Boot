@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface FileService {
 
-    ResponseEntity<FileResponse> save(MultipartFile file, Long userId) throws IOException;
+    ResponseEntity<FileResponse> save(MultipartFile file) throws IOException;
 
     ResponseEntity<byte[]> generatePDF();
     ResponseEntity<byte[]> generateInvoicePDF(List<InvoiceDataDto> invoiceDataDtoList);
