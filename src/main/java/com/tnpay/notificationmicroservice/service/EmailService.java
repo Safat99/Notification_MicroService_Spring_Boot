@@ -18,4 +18,6 @@ public interface EmailService{
     ResponseEntity<?> sendFileToEmail(MultipartFile file, EmailDetailsDto emailDetailsDto);
 
     ResponseEntity<?> sendFileToEmail2(MultipartFile file, String recipient, String subject, String msgBody);
+
+    CompletableFuture<EmailResponse> asyncSendFileToEmail(MultipartFile file, EmailDetailsDto emailDetails);
 }

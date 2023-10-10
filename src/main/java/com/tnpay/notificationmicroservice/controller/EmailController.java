@@ -55,5 +55,14 @@ public class EmailController {
         return emailService.sendFileToEmail2(file,recipient, subject, msgBody);
     }
 
+    @PostMapping(value = "/send-file-to-email-async")
+    public CompletableFuture<EmailResponse> sendFileToEmailAsync(@RequestPart("file") MultipartFile file,
+                                                                 @Valid @RequestPart("emailDetailsDTO")
+                                                                 EmailDetailsDto emailDetailsDto) {
+        return emailService.asyncSendFileToEmail(file, emailDetailsDto);
+    }
+
+
+
 
 }

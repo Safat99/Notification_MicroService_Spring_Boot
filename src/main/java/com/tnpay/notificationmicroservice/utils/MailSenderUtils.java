@@ -2,8 +2,11 @@ package com.tnpay.notificationmicroservice.utils;
 
 import com.tnpay.notificationmicroservice.dto.EmailDetailsDto;
 import com.tnpay.notificationmicroservice.exception.MailSendingException;
+import com.tnpay.notificationmicroservice.service.impl.EmailServiceImpl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,6 +29,7 @@ public class MailSenderUtils {
     private String sender;
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
+    Logger logger = LoggerFactory.getLogger(MailSenderUtils.class);
 
     public MailSenderUtils(JavaMailSender javaMailSender, SpringTemplateEngine templateEngine) {
         this.javaMailSender = javaMailSender;
@@ -98,6 +102,8 @@ public class MailSenderUtils {
         CompletableFuture<Void> future = new CompletableFuture<>();
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
+        System.out.println("2nd async started");
+        logger.info("2nd async started");
 
         try {
             mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
@@ -114,7 +120,8 @@ public class MailSenderUtils {
 
             mimeMessageHelper.addAttachment(Objects.requireNonNull(file.getOriginalFilename()), file);
             javaMailSender.send(mimeMessage);
-
+            System.out.println("2nd async end");
+            logger.info("2nd async ended");
             future.complete(null);
         } catch (Exception e) {
             throw new MailSendingException("future mail catch block: sending failed", e);

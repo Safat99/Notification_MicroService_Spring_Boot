@@ -67,6 +67,11 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    /**
+     * This method works fine and achieved non-blocking behaviour.
+     * @param emailDetails
+     * @return emailResponse
+     */
     @Override
     @Async
     public CompletableFuture<EmailResponse> sendAsyncEmail2(EmailDetailsDto emailDetails) {
@@ -76,7 +81,6 @@ public class EmailServiceImpl implements EmailService {
         EmailResponse emailResponse = new EmailResponse();
         try{
             CompletableFuture<Void> emailSendingFuture = mailSenderUtils.mailSendingFuture(emailDetails,sender); // async method
-
             emailResponse.setResult("email sending process started in the background");
             logger.info("email sending process started under " + Thread.currentThread().getName());
             long end = System.currentTimeMillis();
@@ -99,6 +103,14 @@ public class EmailServiceImpl implements EmailService {
         return ResponseEntity.ok(emailResponse);
     }
 
+    /**
+     * This purposes the same FileSending Email, but it receives different parameters
+     * @param file
+     * @param recipient valid email address
+     * @param subject email subject
+     * @param msgBody // doesn't need in main operation.
+     * @return emailResponse
+     */
     @Override
     public ResponseEntity<?> sendFileToEmail2(MultipartFile file, String recipient, String subject, String msgBody) {
         FileUtils.isValid(file);
@@ -112,6 +124,29 @@ public class EmailServiceImpl implements EmailService {
         EmailResponse emailResponse = new EmailResponse(result);
 
         return ResponseEntity.ok(emailResponse);
+    }
+
+    @Override
+    @Async
+    public CompletableFuture<EmailResponse> asyncSendFileToEmail(MultipartFile file, EmailDetailsDto emailDetails) {
+        long start = System.currentTimeMillis();
+        EmailResponse emailResponse = new EmailResponse();
+
+        try{
+            CompletableFuture<Void> emailSendingFuture = mailSenderUtils.asyncMailSendingWithAttachment(emailDetails, sender, file); // async method
+            emailResponse.setResult("email sending process started in the background");
+
+            logger.info("email sending process started under " + Thread.currentThread().getName());
+            long end = System.currentTimeMillis();
+            logger.info("Total time {} sec", (end - start));
+
+            return CompletableFuture.completedFuture(emailResponse);
+        } catch (MailException e) {
+            emailResponse.setResult("not done!");
+
+//                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(emailResponse);
+            return CompletableFuture.completedFuture(emailResponse);
+        }
     }
 
 
