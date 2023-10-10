@@ -1,6 +1,7 @@
 package com.tnpay.notificationmicroservice.utils;
 
 import com.tnpay.notificationmicroservice.dto.EmailDetailsDto;
+import com.tnpay.notificationmicroservice.exception.BadRequestException;
 import com.tnpay.notificationmicroservice.exception.MailSendingException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -11,8 +12,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Component
@@ -58,14 +61,10 @@ public class MailSenderUtils {
         return future;
     }
 
-    public String mailSendingWithAttachment(EmailDetailsDto emailDetails, String sender) {
+    public String mailSendingWithAttachment(EmailDetailsDto emailDetails, String sender, MultipartFile file) {
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
-
-        if (emailDetails.getAttachment() == null ) {
-            return "No attachment Found";
-        }
 
         try {
             mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
@@ -74,11 +73,12 @@ public class MailSenderUtils {
             mimeMessageHelper.setText(emailDetails.getMsgBody());
             mimeMessageHelper.setSubject(emailDetails.getSubject());
 
-            FileSystemResource file = new FileSystemResource(new File(emailDetails.getAttachment()));
+            mimeMessageHelper.addAttachment(Objects.requireNonNull(file.getOriginalFilename()), file);
+            javaMailSender.send(mimeMessage);
 
-
+            return "Mail Sent Successfully";
         } catch (MessagingException e ) {
-            return "Error while sending mail!!!";
+            throw new MailSendingException("Error while sending email!!", e);
         }
     }
 

@@ -1,10 +1,13 @@
 package com.tnpay.notificationmicroservice.service.impl;
 
+import ch.qos.logback.core.util.FileUtil;
 import com.tnpay.notificationmicroservice.Payload.Response.EmailResponse;
 import com.tnpay.notificationmicroservice.dto.EmailDetailsDto;
 import com.tnpay.notificationmicroservice.exception.MailSendingException;
 import com.tnpay.notificationmicroservice.service.EmailService;
+import com.tnpay.notificationmicroservice.utils.FileUtils;
 import com.tnpay.notificationmicroservice.utils.MailSenderUtils;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final MailSenderUtils mailSenderUtils;
     @Value("${spring.mail.username}")
-    private static String sender;
+    private String sender;
 
     Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
 
@@ -73,17 +76,13 @@ public class EmailServiceImpl implements EmailService {
         EmailResponse emailResponse = new EmailResponse();
         try{
             CompletableFuture<Void> emailSendingFuture = mailSenderUtils.mailSendingFuture(emailDetails,sender); // async method
+
             emailResponse.setResult("email sending process started in the background");
             logger.info("email sending process started under " + Thread.currentThread().getName());
             long end = System.currentTimeMillis();
             logger.info("Total time {} sec", (end - start));
-//                return ResponseEntity.ok(emailResponse);
-                return CompletableFuture.completedFuture(emailResponse);
-//            return emailSendingFuture.thenApplyAsync( result -> true)
-//                    .exceptionally(ex -> {
-////                            ex.printStackTrace();
-//                        return false;
-//                    });
+
+            return CompletableFuture.completedFuture(emailResponse);
         } catch (MailException e) {
             emailResponse.setResult("not done!");
 
@@ -93,10 +92,23 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public ResponseEntity<?> sendInvoiceToEmail(MultipartFile file, EmailDetailsDto emailDetailsDto) {
+    public ResponseEntity<?> sendFileToEmail(MultipartFile file, @Valid EmailDetailsDto emailDetailsDto) {
+        FileUtils.isValid(file);
+        String result = mailSenderUtils.mailSendingWithAttachment(emailDetailsDto, sender, file);
+        EmailResponse emailResponse = new EmailResponse(result);
+        return ResponseEntity.ok(emailResponse);
+    }
 
-
-        return null;
+    @Override
+    public ResponseEntity<?> sendFileToEmail2(MultipartFile file, String recipient, String subject, String msgBody) {
+        FileUtils.isValid(file);
+        EmailDetailsDto emailDetailsDto = new EmailDetailsDto();
+        emailDetailsDto.setMsgBody(msgBody);
+        emailDetailsDto.setRecipient(recipient);
+        emailDetailsDto.setSubject(subject);
+        String result = mailSenderUtils.mailSendingWithAttachment(emailDetailsDto, sender, file);
+        EmailResponse emailResponse = new EmailResponse(result);
+        return ResponseEntity.ok(emailResponse);
     }
 
 

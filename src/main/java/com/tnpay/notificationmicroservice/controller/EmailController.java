@@ -38,9 +38,17 @@ public class EmailController {
         return emailService.sendAsyncEmail2(emailDetails);
     }
 
-    @PostMapping("/send-invoice-to-email-sync")
-    public ResponseEntity<?> sendInvoiceToEmail(@RequestParam("file") MultipartFile file, @Valid @RequestBody EmailDetailsDto emailDetailsDto) {
-        return emailService.sendInvoiceToEmail(file,emailDetailsDto);
+    @PostMapping(value = "/send-file-to-email-sync")
+    public ResponseEntity<?> sendFileToEmail(@RequestPart("file") MultipartFile file, @RequestPart("emailDetailsDTO") EmailDetailsDto emailDetailsDto) {
+        return emailService.sendFileToEmail(file,emailDetailsDto);
+    }
+
+    @PostMapping(value = "/send-file-to-email-sync2")
+    public ResponseEntity<?> sendFileToEmail2(@RequestParam("file") MultipartFile file,
+                                              @RequestParam("recipient") String recipient,
+                                              @RequestParam("subject") String subject,
+                                              @RequestParam("msgBody") String msgBody) {
+        return emailService.sendFileToEmail2(file,recipient, subject, msgBody);
     }
 
 

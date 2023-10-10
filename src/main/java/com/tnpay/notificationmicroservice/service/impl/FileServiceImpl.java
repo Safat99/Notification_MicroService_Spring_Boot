@@ -1,10 +1,8 @@
 package com.tnpay.notificationmicroservice.service.impl;
 
 import com.tnpay.notificationmicroservice.Payload.Response.FileResponse;
-import com.tnpay.notificationmicroservice.dto.FileExtensionDto;
 import com.tnpay.notificationmicroservice.dto.InvoiceDataDto;
 import com.tnpay.notificationmicroservice.dto.ItemReportDataDto;
-import com.tnpay.notificationmicroservice.exception.BadRequestException;
 import com.tnpay.notificationmicroservice.service.FileService;
 import com.tnpay.notificationmicroservice.utils.FileUtils;
 import net.sf.jasperreports.engine.*;
