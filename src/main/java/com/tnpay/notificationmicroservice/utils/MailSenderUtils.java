@@ -1,20 +1,21 @@
 package com.tnpay.notificationmicroservice.utils;
 
 import com.tnpay.notificationmicroservice.dto.EmailDetailsDto;
-import com.tnpay.notificationmicroservice.exception.BadRequestException;
 import com.tnpay.notificationmicroservice.exception.MailSendingException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -24,9 +25,11 @@ public class MailSenderUtils {
     @Value("${spring.mail.username}")
     private String sender;
     private final JavaMailSender javaMailSender;
+    private final SpringTemplateEngine templateEngine;
 
-    public MailSenderUtils(JavaMailSender javaMailSender) {
+    public MailSenderUtils(JavaMailSender javaMailSender, SpringTemplateEngine templateEngine) {
         this.javaMailSender = javaMailSender;
+        this.templateEngine = templateEngine;
     }
 
     public void mailSending(EmailDetailsDto emailDetails, String sender) {
@@ -55,7 +58,7 @@ public class MailSenderUtils {
 
             future.complete(null);
         } catch (Exception e) {
-            throw new MailSendingException("future mail catch block stopped: sending failed", e);
+            throw new MailSendingException("future mail catch block: sending failed", e);
         }
 
         return future;
@@ -68,10 +71,17 @@ public class MailSenderUtils {
 
         try {
             mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+
             mimeMessageHelper.setFrom(sender);
             mimeMessageHelper.setTo(emailDetails.getRecipient());
-            mimeMessageHelper.setText(emailDetails.getMsgBody());
             mimeMessageHelper.setSubject(emailDetails.getSubject());
+
+            // rendering email template with dynamic data using thymeleaf
+            Context context = new Context();
+            context.setVariables(setVariablesOnEmailTemplate(emailDetails));
+            String htmlContent = templateEngine.process("emailTemplate", context);
+            mimeMessageHelper.setText(htmlContent, true);
+//            mimeMessageHelper.setText(emailDetails.getMsgBody(), true);
 
             mimeMessageHelper.addAttachment(Objects.requireNonNull(file.getOriginalFilename()), file);
             javaMailSender.send(mimeMessage);
@@ -80,6 +90,46 @@ public class MailSenderUtils {
         } catch (MessagingException e ) {
             throw new MailSendingException("Error while sending email!!", e);
         }
+    }
+
+    @Async
+    public CompletableFuture<Void> asyncMailSendingWithAttachment(EmailDetailsDto emailDetails,
+                                                                  String sender, MultipartFile file) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper;
+
+        try {
+            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+
+            mimeMessageHelper.setFrom(sender);
+            mimeMessageHelper.setTo(emailDetails.getRecipient());
+            mimeMessageHelper.setSubject(emailDetails.getSubject());
+
+            // rendering email template with dynamic data using thymeleaf
+            Context context = new Context();
+            context.setVariables(setVariablesOnEmailTemplate(emailDetails));
+            String htmlContent = templateEngine.process("emailTemplate", context);
+            mimeMessageHelper.setText(htmlContent, true);
+
+            mimeMessageHelper.addAttachment(Objects.requireNonNull(file.getOriginalFilename()), file);
+            javaMailSender.send(mimeMessage);
+
+            future.complete(null);
+        } catch (Exception e) {
+            throw new MailSendingException("future mail catch block: sending failed", e);
+        }
+
+        return future;
+    }
+
+    private Map<String, Object> setVariablesOnEmailTemplate(EmailDetailsDto emailDetails) {
+        Map<String, Object> templateVariables = new HashMap<>();
+        templateVariables.put("recipientName", emailDetails.getRecipient());
+        templateVariables.put("requestId", 100);
+        templateVariables.put("requestDate", LocalDateTime.now());
+        templateVariables.put("senderName", "PSO Team, TechnoNext");
+        return templateVariables;
     }
 
 }

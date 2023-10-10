@@ -92,7 +92,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public ResponseEntity<?> sendFileToEmail(MultipartFile file, @Valid EmailDetailsDto emailDetailsDto) {
+    public ResponseEntity<?> sendFileToEmail(MultipartFile file, EmailDetailsDto emailDetailsDto) {
         FileUtils.isValid(file);
         String result = mailSenderUtils.mailSendingWithAttachment(emailDetailsDto, sender, file);
         EmailResponse emailResponse = new EmailResponse(result);
@@ -102,12 +102,15 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public ResponseEntity<?> sendFileToEmail2(MultipartFile file, String recipient, String subject, String msgBody) {
         FileUtils.isValid(file);
+
         EmailDetailsDto emailDetailsDto = new EmailDetailsDto();
         emailDetailsDto.setMsgBody(msgBody);
         emailDetailsDto.setRecipient(recipient);
         emailDetailsDto.setSubject(subject);
+
         String result = mailSenderUtils.mailSendingWithAttachment(emailDetailsDto, sender, file);
         EmailResponse emailResponse = new EmailResponse(result);
+
         return ResponseEntity.ok(emailResponse);
     }
 

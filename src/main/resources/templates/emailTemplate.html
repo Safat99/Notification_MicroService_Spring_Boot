@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Message</title>
+</head>
+<body>
+    <p>
+        Dear [[${recipientName}]],
+    </p>
+
+    <p>
+        We are pleased to inform you that your recent request has been approved.
+        The details are as follows:
+    </p>
+
+    <ul>
+        <li><strong>Request ID:</strong> [[${requestId}]]</li>
+        <li><strong>Request Date:</strong> [[${requestDate}]]</li>
+        <!-- Add more details as needed -->
+    </ul>
+
+    <p>
+        You can view the complete details by clicking the button below:
+    </p>
+
+    <a href="http://www.github.com/safat99" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">
+        View Details
+    </a>
+
+    <p>
+        If you have any questions or need further assistance, please don't hesitate to contact us.
+    </p>
+
+    <p>
+        Best regards,<br>
+        [[${senderName}]]
+    </p>
+</body>
+</html>

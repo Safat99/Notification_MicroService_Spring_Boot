@@ -39,7 +39,8 @@ public class EmailController {
     }
 
     @PostMapping(value = "/send-file-to-email-sync")
-    public ResponseEntity<?> sendFileToEmail(@RequestPart("file") MultipartFile file, @RequestPart("emailDetailsDTO") EmailDetailsDto emailDetailsDto) {
+    public ResponseEntity<?> sendFileToEmail(@RequestPart("file") MultipartFile file,
+                                             @Valid @RequestPart("emailDetailsDTO") EmailDetailsDto emailDetailsDto) {
         return emailService.sendFileToEmail(file,emailDetailsDto);
     }
 
@@ -48,6 +49,9 @@ public class EmailController {
                                               @RequestParam("recipient") String recipient,
                                               @RequestParam("subject") String subject,
                                               @RequestParam("msgBody") String msgBody) {
+
+//    public ResponseEntity<?> sendFileToEmail2(@RequestPart("file") MultipartFile file,
+//                                              @Valid @RequestPart("emailDetailsDTO") EmailDetailsDto emailDetailsDto) {
         return emailService.sendFileToEmail2(file,recipient, subject, msgBody);
     }
 
