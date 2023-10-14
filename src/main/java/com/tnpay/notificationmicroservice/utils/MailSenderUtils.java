@@ -2,7 +2,6 @@ package com.tnpay.notificationmicroservice.utils;
 
 import com.tnpay.notificationmicroservice.dto.EmailDetailsDto;
 import com.tnpay.notificationmicroservice.exception.MailSendingException;
-import com.tnpay.notificationmicroservice.service.impl.EmailServiceImpl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
@@ -25,8 +24,8 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class MailSenderUtils {
 
-    @Value("${spring.mail.username}")
-    private String sender;
+//    @Value("${spring.mail.username}")
+//    private String sender;
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
     Logger logger = LoggerFactory.getLogger(MailSenderUtils.class);
@@ -99,35 +98,46 @@ public class MailSenderUtils {
     @Async
     public CompletableFuture<Void> asyncMailSendingWithAttachment(EmailDetailsDto emailDetails,
                                                                   String sender, MultipartFile file) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper;
+//        CompletableFuture<Void> future = new CompletableFuture<>();
+//        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+//        MimeMessageHelper mimeMessageHelper;
         System.out.println("2nd async started");
         logger.info("2nd async started");
 
         try {
-            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+            System.out.println("2nd async started");
+            logger.info("2nd async started");
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+
+            logger.info("create MIME message object done");
 
             mimeMessageHelper.setFrom(sender);
             mimeMessageHelper.setTo(emailDetails.getRecipient());
             mimeMessageHelper.setSubject(emailDetails.getSubject());
+
+            logger.info("120 number line passed");
 
             // rendering email template with dynamic data using thymeleaf
             Context context = new Context();
             context.setVariables(setVariablesOnEmailTemplate(emailDetails));
             String htmlContent = templateEngine.process("emailTemplate", context);
             mimeMessageHelper.setText(htmlContent, true);
+//            mimeMessageHelper.setText(emailDetails.getMsgBody(), true);
+
+            logger.info("128 number line passed");
 
             mimeMessageHelper.addAttachment(Objects.requireNonNull(file.getOriginalFilename()), file);
             javaMailSender.send(mimeMessage);
+
             System.out.println("2nd async end");
             logger.info("2nd async ended");
-            future.complete(null);
-        } catch (Exception e) {
-            throw new MailSendingException("future mail catch block: sending failed", e);
-        }
 
-        return future;
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception e) {
+//            throw new MailSendingException("future mail catch block: sending failed", e);
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     private Map<String, Object> setVariablesOnEmailTemplate(EmailDetailsDto emailDetails) {

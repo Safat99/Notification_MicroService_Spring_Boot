@@ -20,12 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class EmailServiceImpl implements EmailService {
 
     private final MailSenderUtils mailSenderUtils;
-    @Value("${spring.mail.username}")
+    @Value("${mail.username}")
     private String sender;
 
     Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
@@ -134,6 +135,7 @@ public class EmailServiceImpl implements EmailService {
 
         try{
             CompletableFuture<Void> emailSendingFuture = mailSenderUtils.asyncMailSendingWithAttachment(emailDetails, sender, file); // async method
+            emailSendingFuture.get();
             emailResponse.setResult("email sending process started in the background");
 
             logger.info("email sending process started under " + Thread.currentThread().getName());
@@ -146,6 +148,8 @@ public class EmailServiceImpl implements EmailService {
 
 //                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(emailResponse);
             return CompletableFuture.completedFuture(emailResponse);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
