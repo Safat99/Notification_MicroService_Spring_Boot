@@ -1,13 +1,12 @@
 package com.tnpay.notificationmicroservice.service.impl;
 
-import ch.qos.logback.core.util.FileUtil;
 import com.tnpay.notificationmicroservice.Payload.Response.EmailResponse;
 import com.tnpay.notificationmicroservice.dto.EmailDetailsDto;
+import com.tnpay.notificationmicroservice.exception.BadRequestException;
 import com.tnpay.notificationmicroservice.exception.MailSendingException;
 import com.tnpay.notificationmicroservice.service.EmailService;
 import com.tnpay.notificationmicroservice.utils.FileUtils;
 import com.tnpay.notificationmicroservice.utils.MailSenderUtils;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +134,7 @@ public class EmailServiceImpl implements EmailService {
 
         try{
             CompletableFuture<Void> emailSendingFuture = mailSenderUtils.asyncMailSendingWithAttachment(emailDetails, sender, file); // async method
-            emailSendingFuture.get();
+//            emailSendingFuture.get();
             emailResponse.setResult("email sending process started in the background");
 
             logger.info("email sending process started under " + Thread.currentThread().getName());
@@ -148,10 +147,12 @@ public class EmailServiceImpl implements EmailService {
 
 //                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(emailResponse);
             return CompletableFuture.completedFuture(emailResponse);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+//            throw new RuntimeException(e);
+            throw new BadRequestException("exception occurred");
         }
     }
+
 
 
 }

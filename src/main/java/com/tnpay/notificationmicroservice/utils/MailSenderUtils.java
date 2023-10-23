@@ -136,6 +136,7 @@ public class MailSenderUtils {
             return CompletableFuture.completedFuture(null);
         } catch (Exception e) {
 //            throw new MailSendingException("future mail catch block: sending failed", e);
+            logger.info("async thread error", e);
             return CompletableFuture.failedFuture(e);
         }
     }

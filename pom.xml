@@ -41,31 +41,39 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 			<version>3.1.4</version>
 		</dependency>
+<!--		jasperReport dependency-->
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
 			<artifactId>jasperreports</artifactId>
 			<version>6.20.6</version>
 		</dependency>
+<!--		needs this dependency for jasper report barcode processing-->
 		<dependency>
 			<groupId>net.sf.barcode4j</groupId>
 			<artifactId>barcode4j</artifactId>
 			<version>2.1</version>
 		</dependency>
+<!-- needs this dependency for jasper report fill>-->
 		<dependency>
 			<groupId>com.google.zxing</groupId>
 			<artifactId>core</artifactId>
 			<version>3.5.2</version>
 		</dependency>
+
+<!--		This dependency is part of Apache Batik, a library for working with Scalable Vector Graphics (SVG)-->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-bridge</artifactId>
 			<version>1.11</version>
 		</dependency>
+
+<!--		need thymeleaf for using emailTemplate.html -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 			<version>3.1.4</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
