@@ -3,6 +3,7 @@ package com.tnpay.notificationmicroservice.service.impl;
 import com.tnpay.notificationmicroservice.Payload.Response.FileResponse;
 import com.tnpay.notificationmicroservice.dto.InvoiceDataDto;
 import com.tnpay.notificationmicroservice.dto.ItemReportDataDto;
+import com.tnpay.notificationmicroservice.exception.BadRequestException;
 import com.tnpay.notificationmicroservice.service.FileService;
 import com.tnpay.notificationmicroservice.utils.FileUtils;
 import net.sf.jasperreports.engine.*;
@@ -88,31 +89,10 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public ResponseEntity<byte[]> generateInvoicePDF(List<InvoiceDataDto> invoiceDataDtoList) {
+    public ResponseEntity<byte[]> generateInvoicePDF(List<InvoiceDataDto> invoiceDataDtoList, Integer invoiceNo) {
         try {
-
-            InputStream templateInputStream = getClass().getResourceAsStream("/templates/invoice-report-test1.jrxml");
-//            InputStream templateInputStream = getClass().getResourceAsStream("/templates/invoice_report_v1.jrxml");
-            JasperReport jasperReport = JasperCompileManager.compileReport(templateInputStream);
-
-            // Create data source (if needed)
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(invoiceDataDtoList);
-
-            // Set parameters (if needed)
-            Map<String, Object> params = new HashMap<>();
-            params.put("invoice_no", 200);
-            params.put("CollectionBeanParam", dataSource);
-
-            // Fill the report
-//            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource());
-
-            // Export the report to a PDF file
             byte[] pdfBytes;
-            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
-                pdfBytes = outputStream.toByteArray();
-            }
+            pdfBytes = generatePdfByte(invoiceDataDtoList, invoiceNo);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
@@ -127,6 +107,35 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    public static byte[] generatePdfByte(List<InvoiceDataDto> invoiceDataDtoList, Integer invoiceNo) throws JRException {
+        // PDF generation logic
+        InputStream templateInputStream = FileServiceImpl.class.getResourceAsStream("/templates/invoice-report-test1.jrxml");
+        //            InputStream templateInputStream = getClass().getResourceAsStream("/templates/invoice_report_v1.jrxml");
+        JasperReport jasperReport = JasperCompileManager.compileReport(templateInputStream);
+
+        // Create data source (if needed)
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(invoiceDataDtoList);
+
+        // Set parameters (if needed)
+        Map<String, Object> params = new HashMap<>();
+        params.put("invoice_no", invoiceNo);
+        params.put("CollectionBeanParam", dataSource);
+
+        // Fill the report
+        //            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource());
+
+        // Export the report to a PDF file
+        byte[] pdfBytes;
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            pdfBytes = outputStream.toByteArray();
+        } catch (IOException e) {
+            throw new BadRequestException("IOException occurred during generating PDF");
+        }
+        return pdfBytes;
     }
 
 

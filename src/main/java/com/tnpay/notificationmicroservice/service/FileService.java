@@ -13,6 +13,6 @@ public interface FileService {
     ResponseEntity<FileResponse> save(MultipartFile file) throws IOException;
 
     ResponseEntity<byte[]> generatePDF();
-    ResponseEntity<byte[]> generateInvoicePDF(List<InvoiceDataDto> invoiceDataDtoList);
+    ResponseEntity<byte[]> generateInvoicePDF(List<InvoiceDataDto> invoiceDataDtoList, Integer invoiceNo);
 
 }

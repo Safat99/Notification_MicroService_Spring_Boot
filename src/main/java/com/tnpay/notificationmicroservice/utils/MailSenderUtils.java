@@ -7,6 +7,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -91,6 +92,32 @@ public class MailSenderUtils {
 
             return "Mail Sent Successfully";
         } catch (MessagingException e ) {
+            throw new MailSendingException("Error while sending email!!", e);
+        }
+    }
+
+    public String sendPdfToEmail(byte[] pdfBytes, String sender, EmailDetailsDto emailDetailsDto) {
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+
+            mimeMessageHelper.setFrom(sender);
+            mimeMessageHelper.setTo(emailDetailsDto.getRecipient());
+            mimeMessageHelper.setSubject(emailDetailsDto.getSubject());
+
+            // rendering email template with dynamic data using thymeleaf
+            Context context = new Context();
+            context.setVariables(setVariablesOnEmailTemplate(emailDetailsDto));
+            String htmlContent = templateEngine.process("emailTemplate", context);
+            mimeMessageHelper.setText(htmlContent, true);
+
+            // Attach the generated PDF
+            mimeMessageHelper.addAttachment("Invoice_report.pdf", new ByteArrayResource(pdfBytes));
+
+            javaMailSender.send(mimeMessage);
+
+            return "Mail Sent Successfully";
+        } catch (MessagingException e) {
             throw new MailSendingException("Error while sending email!!", e);
         }
     }

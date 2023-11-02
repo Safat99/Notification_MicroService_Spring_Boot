@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableAsync
-@EnableConfigurationProperties(MailProperties.class)
+	@EnableConfigurationProperties(MailProperties.class)
 public class NotificationMicroserviceApplication {
 
 	public static void main(String[] args) {

@@ -33,7 +33,7 @@ public class FileController {
     }
 
     @PostMapping("/generate-test-invoice-pdf")
-    public ResponseEntity<byte[]> generateInvoicePDF(@Valid @RequestBody List<InvoiceDataDto> invoiceDataDtoList) {
-        return fileService.generateInvoicePDF(invoiceDataDtoList);
+    public ResponseEntity<byte[]> generateInvoicePDF(@Valid @RequestBody List<InvoiceDataDto> invoiceDataDtoList, Integer invoiceNo) {
+        return fileService.generateInvoicePDF(invoiceDataDtoList, invoiceNo);
     }
 }

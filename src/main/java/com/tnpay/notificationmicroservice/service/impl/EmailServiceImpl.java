@@ -2,11 +2,13 @@ package com.tnpay.notificationmicroservice.service.impl;
 
 import com.tnpay.notificationmicroservice.Payload.Response.EmailResponse;
 import com.tnpay.notificationmicroservice.dto.EmailDetailsDto;
+import com.tnpay.notificationmicroservice.dto.InvoiceDataDto;
 import com.tnpay.notificationmicroservice.exception.BadRequestException;
 import com.tnpay.notificationmicroservice.exception.MailSendingException;
 import com.tnpay.notificationmicroservice.service.EmailService;
 import com.tnpay.notificationmicroservice.utils.FileUtils;
 import com.tnpay.notificationmicroservice.utils.MailSenderUtils;
+import net.sf.jasperreports.engine.JRException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
+import static com.tnpay.notificationmicroservice.service.impl.FileServiceImpl.generatePdfByte;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -96,7 +101,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public ResponseEntity<?> sendFileToEmail(MultipartFile file, EmailDetailsDto emailDetailsDto) {
+    public ResponseEntity<EmailResponse> sendFileToEmail(MultipartFile file, EmailDetailsDto emailDetailsDto) {
         FileUtils.isValid(file);
         String result = mailSenderUtils.mailSendingWithAttachment(emailDetailsDto, sender, file);
         EmailResponse emailResponse = new EmailResponse(result);
@@ -153,6 +158,15 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    public ResponseEntity<EmailResponse> generateInvoiceAndSendEmail(List<InvoiceDataDto> invoiceDataDtoList, EmailDetailsDto emailDetailsDto, Integer invoiceNo) throws JRException {
+        byte[] pdfBytes;
+        pdfBytes = generatePdfByte(invoiceDataDtoList, invoiceNo);
+
+        String result = mailSenderUtils.sendPdfToEmail(pdfBytes, sender, emailDetailsDto);
+        EmailResponse emailResponse = new EmailResponse(result);
+        return ResponseEntity.ok(emailResponse);
+    }
 
 
 }
