@@ -6,7 +6,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -67,6 +66,24 @@ public class MailSenderUtils {
 
         return future;
     }
+
+    public void markUpMailSending(EmailDetailsDto emailDetails, String sender) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, false);
+
+            helper.setFrom(sender);
+            helper.setTo(emailDetails.getRecipient());
+            helper.setSubject(emailDetails.getSubject());
+            helper.setText(emailDetails.getMsgBody(), true);
+
+            javaMailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new MailSendingException("Error sending MarkUp mail", e);
+        }
+    }
+
 
     public String mailSendingWithAttachment(EmailDetailsDto emailDetails, String sender, MultipartFile file) {
 

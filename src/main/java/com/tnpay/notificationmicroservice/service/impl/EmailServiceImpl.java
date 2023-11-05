@@ -22,8 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 import static com.tnpay.notificationmicroservice.service.impl.FileServiceImpl.generatePdfByte;
 
 @Service
